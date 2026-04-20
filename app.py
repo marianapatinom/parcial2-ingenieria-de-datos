@@ -18,12 +18,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+import os
+
 # Cachear la carga de datos
 @st.cache_data
 def load_data():
     try:
-        # Cargar los datos desde su carpeta
-        df = pd.read_csv("data/airline_losses.csv")
+        # Construir la ruta absoluta correcta independiente de desde dónde se ejecute streamlit
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        data_path = os.path.join(base_dir, "data", "airline_losses.csv")
+        df = pd.read_csv(data_path)
     except FileNotFoundError:
         # Fallback de inicialización caso no encuentre la ruta
         df = pd.DataFrame()
