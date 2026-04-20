@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline de Datos y Despliegue | Documentación</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Airline Disruptions Analytics</h1>
+            <p class="subtitle">Documentación técnica oficial del pipeline de datos y despliegue sobre interrupciones operativas en la industria aérea.</p>
+        </header>
+
+        <section class="glass-card">
+            <h2>Descripción del Dataset</h2>
+            <p style="color: var(--text-muted); line-height: 1.8;">
+                Este conjunto de datos recopila información detallada sobre interrupciones operativas globales en diversas aerolíneas. 
+                Los incidentes registrados incluyen vuelos cancelados de manera imprevista, redireccionamientos de rutas y su correlación 
+                directa con las pérdidas económicas estimadas, el impacto a los pasajeros y los costos adicionales generados (por ejemplo, el consumo extra de combustible).
+                El dataset ha sido sometido a un proceso de limpieza profundo mediante un flujo de trabajo ETL (Extract, Transform, Load) 
+                para asegurar la más alta calidad en el momento del modelado predictivo y el análisis descriptivo.
+            </p>
+        </section>
+
+        <section class="glass-card">
+            <h2>Fuente de los Datos</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                Los datos brutos provienen del repositorio colaborativo de la comunidad de Kaggle (<strong>"Airline Disruptions and Operational Impact Dataset"</strong>). Se ha consolidado como el estándar de la industria para analizar la confiabilidad logística y el impacto económico global en la aviación civil.
+            </p>
+            <a href="https://www.kaggle.com" class="source-link" target="_blank">
+                Ver fuente original en Kaggle &rarr;
+            </a>
+        </section>
+
+        <section class="glass-card">
+            <h2>Diccionario de Variables</h2>
+            <div class="dict-grid">
+                <div class="dict-item">
+                    <h3>airline</h3>
+                    <p>Nombre de la aerolínea afectada (e.g., Emirates, Qatar Airways).</p>
+                </div>
+                <div class="dict-item">
+                    <h3>country</h3>
+                    <p>País sede donde ocurren las operaciones de la aerolínea.</p>
+                </div>
+                <div class="dict-item">
+                    <h3>airline_type</h3>
+                    <p>Clasificación de la compañía (Flag Carrier, Cargo, Low Cost).</p>
+                </div>
+                <div class="dict-item">
+                    <h3>estimated_loss_usd</h3>
+                    <p>Costo financiero total estimado generado por las interrupciones en dólares estadounidenses.</p>
+                </div>
+                <div class="dict-item">
+                    <h3>cancellations_count</h3>
+                    <p>Número verificado de vuelos suspendidos sin operación.</p>
+                </div>
+                <div class="dict-item">
+                    <h3>reroutes_count</h3>
+                    <p>Cantidad de operaciones de vuelo desviadas de su ruta planificada inicial.</p>
+                </div>
+                <div class="dict-item">
+                    <h3>revenue_loss_pct</h3>
+                    <p>Porcentaje de la pérdida de ingresos respecto al revenue base planificado.</p>
+                </div>
+                <div class="dict-item">
+                    <h3>region</h3>
+                    <p>Región geográfica a la que pertenece la aerolínea (e.g., Middle East, Europe).</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Proyecto Universitario "Pipeline de Datos y Despliegue" - Ingeniería de Datos</p>
+            <p>&copy; 2026 Mariana Patiño Múnera</p>
+        </footer>
+    </div>
+
+</body>
+</html>
