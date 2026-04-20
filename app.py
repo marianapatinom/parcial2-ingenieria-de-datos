@@ -9,12 +9,77 @@ import graphviz
 # Configuración de página
 st.set_page_config(page_title="Airline Disruptions Analytics", page_icon="✈️", layout="wide")
 
-# Estilos personalizados intermedios para Streamlit
+# Estilos personalizados premium para Streamlit
 st.markdown("""
     <style>
-    .main {background-color: #f8f9fa;}
-    h1, h2, h3 {color: #1e3a8a;}
-    .stMetric {background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);}
+    /* Estilo General y Tipografía */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Fondo General de la App */
+    .stApp {
+        background-color: #f8fafc;
+        background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    /* Estilo del Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        border-right: none;
+    }
+
+    /* Tarjetas de Métricas (KPIs) Animadas */
+    div[data-testid="metric-container"] {
+        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 5px solid #3b82f6;
+    }
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px -5px rgba(59, 130, 246, 0.15);
+        border-left: 5px solid #8b5cf6;
+    }
+
+    /* Valores y Etiquetas de KPIs */
+    div[data-testid="stMetricValue"] {
+        font-size: 2.2rem;
+        color: #0f172a;
+        font-weight: 800;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 1.05rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Títulos */
+    h1 {
+        background: -webkit-linear-gradient(45deg, #2563eb, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+    h2, h3 {
+        color: #1e293b;
+        font-weight: 700;
+    }
+    
+    /* Alertas */
+    .stAlert {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -120,68 +185,3 @@ else:
         
         st.sidebar.markdown("### ⚙️ Parámetros del Evento")
         sim_cancellations = st.sidebar.slider("Cant. Vuelos Cancelados", 0, int(df['cancellations_count'].max() * 1.5), int(df['cancellations_count'].mean()))
-        sim_reroutes = st.sidebar.slider("Cant. Redireccionamientos", 0, int(df['reroutes_count'].max() * 1.5), int(df['reroutes_count'].mean()))
-        sim_rev_loss = st.sidebar.number_input("Pérdida de Rev Estimada (%)", min_value=0.0, max_value=100.0, value=float(df['revenue_loss_pct'].mean()))
-        
-        st.markdown("### 🧠 Simulación de Impacto del Riesgo")
-        st.info("Ajuste los parámetros en la barra lateral para observar la inferencia generada por el Random Forest en vivo.")
-        
-        pred_loss = model.predict(np.array([[sim_cancellations, sim_reroutes, sim_rev_loss]]))[0]
-        st.metric(label="Pérdida Financiera Estimada", value=f"${pred_loss:,.2f} USD")
-        
-    elif menu == "⚙️ Orquestación de Datos":
-        st.title("⚙️ Orquestación de Datos (Apache Airflow)")
-        st.markdown("Sección interactiva de simulación de flujos de trabajo basados en el ecosistema **Apache Airflow**. Se incluyen conceptos básicos de programación de workflows implementando **DAGs (Directed Acyclic Graphs)**.")
-        
-        st.markdown("---")
-        st.markdown("### 🔹 Ejercicio 1: DAG ETL Pipeline (`covid_etl_pipeline.py`) adaptado a Aerolíneas")
-        st.write('''
-            **Descripción del Ejercicio:**  
-            Este ejercicio define y documenta un flujo de automatización completo de Extracción, Transformación, Verificación de Calidad y Carga (Data Quality ETL). Es uno de los estándares principales enseñados para construir pipelines resilientes que transforman un feed externo en datos listos para el Data Warehouse.
-            
-            **Secuencia de Tareas:**
-            1. **`extract_data`**: Usando sensores y peticiones, descarga los datos crudos diariamente y comunica la ruta temporal usando mecanismos (XComs).
-            2. **`transform_data`**: Aplica operaciones de limpieza para sanear valores nulos, estandariza monedas o formatos y procesa las métricas de negocio.
-            3. **`quality_check`**: Un punto de validación esencial. Detiene el proceso (falla la tarea) si el archivo procesado está vacío o si superan los umbrales de nulos permitidos.
-            4. **`load_data`**: Movimiento final de los datos seguros persistiendo su almacenamiento en BigQuery, Postgres o almacenes de analítica.
-        ''')
-        
-        dag1 = graphviz.Digraph(engine='dot')
-        dag1.attr(rankdir='LR')
-        dag1.node('A', '🌐 extract_data', shape='box', style='filled', fillcolor='#D4E6F1')
-        dag1.node('B', '🔧 transform_data', shape='box', style='filled', fillcolor='#D4E6F1')
-        dag1.node('C', '🔍 quality_check', shape='box', style='filled', fillcolor='#F9E79F')
-        dag1.node('D', '💾 load_data', shape='box', style='filled', fillcolor='#A9DFBF')
-        
-        dag1.edges(['AB', 'BC', 'CD'])
-        st.graphviz_chart(dag1)
-        
-        st.markdown("---")
-        st.markdown("### 🔹 Ejercicio 2: Monitoreo de Procesos y Control de Flujo (Trigger Rules)")
-        st.write('''
-            **Descripción del Ejercicio:**  
-            En sistemas en producción, no todos los DAGs son estrictamente secuenciales. Este ejercicio básico de programación de workflows demuestra el control avanzado de ejecución mediante las **Trigger Rules**. Sirve como un DAG de monitoreo paralelo para administrar alertas en los sistemas lógicos.
-            
-            **Conceptos de Reglas Aplicados:**
-            - **`all_success` (Ejecución Normal):** La regla estándar de progreso. Las tareas principales deben concluir con éxito para avanzar a la tarea principal de fin de batch.
-            - **`one_failed` (Alerta Crítica):** Se define un "nodo listener". Si cualquiera de las tareas de ingesta del workflow llegara a fallar, este nodo se dispara automáticamente para enviar una alerta inmediata a los analistas (vía Slack/Email).
-            - **`one_success`:** Variante útil para proceder si al menos un servidor o API espejo logró devolver la respuesta sin esperar al resto.
-        ''')
-        
-        dag2 = graphviz.Digraph()
-        dag2.attr(rankdir='TD')
-        dag2.node('T1', 'api_ingestion_1', shape='box', style='filled', fillcolor='#D4E6F1')
-        dag2.node('T2', 'api_ingestion_2 (Fails)', shape='box', style='filled', fillcolor='#F5B7B1')
-        dag2.node('T3', 'api_ingestion_3', shape='box', style='filled', fillcolor='#D4E6F1')
-        
-        dag2.node('N1', '✅ normal_flow\n(all_success)', shape='ellipse', style='filled', fillcolor='#A9DFBF')
-        dag2.node('N2', '🚨 slack_alert\n(one_failed)', shape='octagon', style='filled', fillcolor='#F1948A')
-        
-        # Conexiones
-        for t in ['T1', 'T2', 'T3']:
-            dag2.edge(t, 'N1', style='dashed')
-            dag2.edge(t, 'N2')
-            
-        st.graphviz_chart(dag2)
-        
-        st.success("Ejercicios basados y escalados referenciando los fundamentos presentados en la plataforma: airflowdocker.netlify.app")
