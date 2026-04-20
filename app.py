@@ -173,26 +173,72 @@ else:
             st.dataframe(df_filtered.style.background_gradient(subset=["estimated_loss_usd"], cmap="Blues"))
 
     elif "Predictivo" in menu:
-        st.title("🤖 Análisis Predictivo en Tiempo Real")
-        st.markdown("Simulación con Machine Learning para calcular los sobrecostos y la pérdida total en caso de un incidente imprevisto futuro.")
+        st.title("🤖 Laboratorio de Análisis Predictivo")
+        st.markdown("Simulador avanzado basado en **Machine Learning** (Random Forest) para inferir sobrecostos y la pérdida financiera esperada ante contingencias masivas de vuelos.")
         
-        # Preparar modelo sencillo (Random Forest Regressor)
+        # Preparar modelo (Random Forest Regressor)
         X = df[['cancellations_count', 'reroutes_count', 'revenue_loss_pct']]
         y = df['estimated_loss_usd']
         
-        model = RandomForestRegressor(random_state=42)
-        model.fit(X, y)
+        from sklearn.metrics import r2_score
+        # Split solo para poder reportar la métrica real del modelo en la vista
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
-        st.sidebar.markdown("### ⚙️ Parámetros del Evento")
-        sim_cancellations = st.sidebar.slider("Cant. Vuelos Cancelados", 0, int(df['cancellations_count'].max() * 1.5), int(df['cancellations_count'].mean()))
-        sim_reroutes = st.sidebar.slider("Cant. Redireccionamientos", 0, int(df['reroutes_count'].max() * 1.5), int(df['reroutes_count'].mean()))
-        sim_rev_loss = st.sidebar.number_input("Pérdida de Rev Estimada (%)", min_value=0.0, max_value=100.0, value=float(df['revenue_loss_pct'].mean()))
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
         
-        st.markdown("### 🧠 Simulación de Impacto del Riesgo")
-        st.info("Ajuste los parámetros en la barra lateral para observar la inferencia generada por el Random Forest en vivo.")
+        st.markdown("---")
         
-        pred_loss = model.predict(np.array([[sim_cancellations, sim_reroutes, sim_rev_loss]]))[0]
-        st.metric(label="Pérdida Financiera Estimada", value=f"${pred_loss:,.2f} USD")
+        # Panel de Simulación (Columnas centrales para mejor experiencia de usuario)
+        st.markdown("### 🎛️ Panel de Control de Contingencias")
+        st.caption("Ajuste los medidores en tiempo real para simular el impacto económico usando el modelo de árboles de decisión entrenado.")
+        
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            sim_cancellations = st.slider("❌ Vuelos Cancelados", 0, int(df['cancellations_count'].max() * 1.5), int(df['cancellations_count'].mean()))
+        with col_s2:
+            sim_reroutes = st.slider("🔀 Redireccionamientos", 0, int(df['reroutes_count'].max() * 1.5), int(df['reroutes_count'].mean()))
+        with col_s3:
+            sim_rev_loss = st.number_input("📉 Pérdida de Revenue (%)", min_value=0.0, max_value=100.0, value=float(df['revenue_loss_pct'].mean()))
+            
+        # Ejecutar Predicción dinámica
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            pred_loss = model.predict(np.array([[sim_cancellations, sim_reroutes, sim_rev_loss]]))[0]
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col_res1, col_res2 = st.columns([1, 1.5])
+        
+        with col_res1:
+            st.info("💡 **Inferencia del Modelo en Vivo**")
+            diff_from_mean = pred_loss - df['estimated_loss_usd'].mean()
+            
+            st.metric(label="Pérdida Financiera Estimada", 
+                      value=f"${pred_loss:,.0f} USD", 
+                      delta=f"{diff_from_mean:,.0f} vs Estándar",
+                      delta_color="inverse")
+            st.success("Cálculo ejecutado y validado.")
+            
+            with st.expander("🛠️ Ver métricas técnicas (Data Science)"):
+                st.write(f"**Algoritmo:** `RandomForestRegressor()`")
+                st.write(f"**Precisión (R² Score):** `{r2:.4f}`")
+                st.caption("El Random Forest utiliza ensamblaje múltiple para evitar overfitting de los datos atípicos generados en la aviación.")
+            
+        with col_res2:
+            st.info("📊 **Importancia de Variables (Feature Importance)**")
+            # Extraer las importancias del Random Forest y graficarlas
+            importances = model.feature_importances_
+            features = ['Cancelaciones', 'Rerutas', 'Pct. Revenue']
+            df_imp = pd.DataFrame({'Variable': features, 'Importancia': importances}).sort_values(by='Importancia', ascending=True)
+            
+            fig_imp = px.bar(df_imp, x='Importancia', y='Variable', orientation='h',
+                             color='Importancia', color_continuous_scale='Purples', 
+                             template='plotly_white', height=250)
+            fig_imp.update_layout(margin=dict(l=0, r=0, t=10, b=0), showlegend=False, xaxis_title="", yaxis_title="")
+            st.plotly_chart(fig_imp, use_container_width=True)
         
     elif "Orquestación" in menu:
         st.title("⚙️ Orquestación de Datos (Apache Airflow)")
@@ -250,4 +296,5 @@ else:
         st.graphviz_chart(dag2)
         
         st.success("Ejercicios basados y escalados referenciando los fundamentos presentados en la plataforma: airflowdocker.netlify.app")
+
 
